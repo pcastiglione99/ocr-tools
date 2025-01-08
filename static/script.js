@@ -55,6 +55,7 @@ canvas.addEventListener("click", (event) => {
         ctx.moveTo(points[points.length - 2][0], points[points.length - 2][1]);
         ctx.lineTo(x, y);
         ctx.stroke();
+        
     }
 
     if (points.length === 4) {
@@ -63,6 +64,16 @@ canvas.addEventListener("click", (event) => {
         ctx.lineTo(points[0][0], points[0][1]);
         ctx.stroke();
         processButton.disabled = false;
+
+        // Fill the area
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1]);
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i][0], points[i][1]);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "rgba(0, 255, 0, 0.2)"; // Set a semi-transparent green color for the fill
+        ctx.fill();
     }
 });
 
