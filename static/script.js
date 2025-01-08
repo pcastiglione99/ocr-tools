@@ -6,6 +6,7 @@ const outputImage = document.getElementById("output");
 
 let image = new Image();
 let points = [];
+let draggingPointIndex = null;
 let imagePath = "";
 
 uploadInput.addEventListener("change", (event) => {
@@ -36,46 +37,92 @@ image.onload = () => {
     processButton.disabled = true;
 };
 
+
+
 canvas.addEventListener("click", (event) => {
-    if (points.length >= 4) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Check if clicking near an existing point
+    const pointIndex = points.findIndex(([px, py]) => Math.hypot(px - x, py - y) < 10);
+
+    if (pointIndex === -1) { // Add a new point if not near an existing one
+        if (points.length >= 4) return;
+        points.push([x, y]);
+    } else {
+        return; // Do nothing on click if near an existing point (use drag or delete instead)
+    }
+
+    redrawCanvas();
+});
+
+canvas.addEventListener("mousedown", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Check if a point is being dragged
+    draggingPointIndex = points.findIndex(([px, py]) => Math.hypot(px - x, py - y) < 30);
+});
+
+canvas.addEventListener("mousemove", (event) => {
+    if (draggingPointIndex === null) return;
 
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    points.push([x, y]);
 
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-    ctx.fill();
+    // Update the position of the dragged point
+    points[draggingPointIndex] = [x, y];
+    redrawCanvas();
+});
 
-    if (points.length > 1) {
-        ctx.strokeStyle = "green";
+canvas.addEventListener("mouseup", () => {
+    draggingPointIndex = null; // Stop dragging when mouse is released
+});
+
+
+function redrawCanvas() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0);
+
+    // Redraw points and lines
+    points.forEach(([x, y], i) => {
+        ctx.fillStyle = "red";
         ctx.beginPath();
-        ctx.moveTo(points[points.length - 2][0], points[points.length - 2][1]);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        
-    }
+        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        ctx.fill();
 
+        if (i > 0) {
+            ctx.strokeStyle = "green";
+            ctx.beginPath();
+            ctx.moveTo(points[i - 1][0], points[i - 1][1]);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    });
+
+    // Connect the last point to the first if there are 4 points
     if (points.length === 4) {
         ctx.beginPath();
         ctx.moveTo(points[3][0], points[3][1]);
         ctx.lineTo(points[0][0], points[0][1]);
         ctx.stroke();
-        processButton.disabled = false;
 
-        // Fill the area
+        // Fill the polygon
         ctx.beginPath();
         ctx.moveTo(points[0][0], points[0][1]);
-        for (let i = 1; i < points.length; i++) {
-            ctx.lineTo(points[i][0], points[i][1]);
-        }
+        points.forEach(([x, y]) => ctx.lineTo(x, y));
         ctx.closePath();
-        ctx.fillStyle = "rgba(0, 255, 0, 0.2)"; // Set a semi-transparent green color for the fill
+        ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
         ctx.fill();
+
+        processButton.disabled = false;
     }
-});
+}
+
 
 processButton.addEventListener("click", () => {
     fetch("/process", {
