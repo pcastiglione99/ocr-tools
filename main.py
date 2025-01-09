@@ -39,7 +39,8 @@ class ProcessRequest(BaseModel):
 # Endpoint per elaborare l'immagine
 @app.post("/process")
 async def process_image(request: ProcessRequest):
-
+    
+    #ratio = float(request.ratio)
     points = request.points
     imagePath = request.imagePath
 

@@ -5,9 +5,18 @@ const processButton = document.getElementById("process-button");
 const outputImage = document.getElementById("output");
 
 let image = new Image();
+let hRatio = 0;
+let vRatio = 0;
+let ratio=0;
+let centerShift_x = 0;
+let centerShift_y = 0;
 let points = [];
 let draggingPointIndex = null;
 let imagePath = "";
+
+canvas.width=500;
+canvas.height=200;
+
 
 uploadInput.addEventListener("change", (event) => {
     const file = event.target.files[0];
@@ -30,14 +39,20 @@ uploadInput.addEventListener("change", (event) => {
 
 image.onload = () => {
     canvas.hidden = false;
-    canvas.width = image.width;
-    canvas.height = image.height;
-    ctx.drawImage(image, 0, 0);
+
+    hRatio = canvas.width / image.width;
+    vRatio = canvas.height / image.height;
+    ratio  = Math.min ( hRatio, vRatio );
+
+    centerShift_x = ( canvas.width - image.width*ratio ) / 2;
+    centerShift_y = ( canvas.height - image.height*ratio ) / 2;
+
+    console.log(ratio);
+
+    ctx.drawImage(image, 0,0, image.width, image.height, centerShift_x, centerShift_y,image.width*ratio, image.height*ratio);
     points = [];
     processButton.disabled = true;
 };
-
-
 
 canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -86,7 +101,8 @@ canvas.addEventListener("mouseup", () => {
 function redrawCanvas() {
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(image, 0, 0);
+    ctx.drawImage(image, 0,0, image.width, image.height, centerShift_x, centerShift_y,image.width*ratio, image.height*ratio);
+
 
     // Redraw points and lines
     points.forEach(([x, y], i) => {
@@ -125,6 +141,11 @@ function redrawCanvas() {
 
 
 processButton.addEventListener("click", () => {
+    console.log(points);
+    console.log(ratio);
+    points = points.map(([x,y]) => [(x - centerShift_x)/ratio, (y - centerShift_y)/ratio]);
+
+
     fetch("/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
