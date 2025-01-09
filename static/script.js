@@ -2,6 +2,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const uploadInput = document.getElementById("upload");
 const processButton = document.getElementById("process-button");
+const detectCornersButton = document.getElementById("detect-corners-button");
 const outputImage = document.getElementById("output");
 
 let image = new Image();
@@ -15,7 +16,7 @@ let draggingPointIndex = null;
 let imagePath = "";
 
 canvas.width=500;
-canvas.height=200;
+canvas.height=300;
 
 
 uploadInput.addEventListener("change", (event) => {
@@ -46,12 +47,12 @@ image.onload = () => {
 
     centerShift_x = ( canvas.width - image.width*ratio ) / 2;
     centerShift_y = ( canvas.height - image.height*ratio ) / 2;
-
-    console.log(ratio);
+    
 
     ctx.drawImage(image, 0,0, image.width, image.height, centerShift_x, centerShift_y,image.width*ratio, image.height*ratio);
     points = [];
     processButton.disabled = true;
+    detectCornersButton.disabled = false;
 };
 
 canvas.addEventListener("click", (event) => {
@@ -139,10 +140,24 @@ function redrawCanvas() {
     }
 }
 
+detectCornersButton.addEventListener("click", () => {
+    const formData = new FormData();
+    formData.append("imagePath", imagePath);
+
+    fetch("/detect", {
+        method: "POST",
+        body: formData,
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        points = data.corners;
+        points = points.map(([x,y]) => [x*ratio+centerShift_x, y*ratio+centerShift_y]);
+        redrawCanvas()
+    })
+    .catch((error) => console.error("Errore:", error));;
+})
 
 processButton.addEventListener("click", () => {
-    console.log(points);
-    console.log(ratio);
     points = points.map(([x,y]) => [(x - centerShift_x)/ratio, (y - centerShift_y)/ratio]);
 
 

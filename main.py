@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import os
 from pydantic import BaseModel
+from detect_page_corners import detect_page_corners
 
 app = FastAPI()
 
@@ -30,6 +31,90 @@ async def upload_image(image: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await image.read())
     return {"filepath": f"/uploads/{image.filename}"}
+    
+
+@app.post("/detect")
+def detect_page_corners(imagePath: str = Form()):
+    # Load the image
+    image_path = imagePath.replace("/uploads/", "")
+    full_path = os.path.join(UPLOAD_FOLDER, image_path)
+    image = cv2.imread(full_path) 
+
+    # Resize the image for better processing (optional)
+    scale_percent = 100  # Adjust the percentage for resizing
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    image = cv2.resize(image, (width, height))
+
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+
+    # Find contours
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Sort contours by area in descending order
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    
+    # Loop through contours to find the page contour
+    for contour in contours:
+        # Approximate the contour
+        epsilon = 0.02 * cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, epsilon, True)
+
+        # If the approximated contour has 4 points, we assume it's the page
+        if len(approx) == 4:
+            page_contour = approx
+            break
+    else:
+        print("Could not detect page corners.")
+        return None
+
+    # Refine corner detection using perspective transformation
+    corner_points = page_contour[:, 0, :].astype(np.float32)
+
+    # Draw the detected contour on the original resized image
+    a = cv2.drawContours(image, [page_contour], -1, (0, 255, 0), 2)
+
+    # Highlight the corners
+    for point in page_contour:
+        x, y = point[0]
+        cv2.circle(image, (x, y), 5, (0, 0, 255), -1)
+
+    # Display the result
+    #cv2.imshow("Detected Page Corners", a)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+    #print(corner_points)
+
+    # Calculate the center of the contour
+    center_x = np.mean(corner_points[:, 0])
+    center_y = np.mean(corner_points[:, 1])
+
+    # Sort points based on their relative positions
+    ordered_corners = sorted(
+        corner_points,
+        key=lambda point: (np.arctan2(point[1] - center_y, point[0] - center_x))
+    )
+
+    # Manually assign topleft, topright, bottomright, bottomleft
+    top_left = min(ordered_corners, key=lambda point: point[0] + point[1])
+    bottom_right = max(ordered_corners, key=lambda point: point[0] + point[1])
+    bottom_left = min(ordered_corners, key=lambda point: point[0] - point[1])
+    top_right = max(ordered_corners, key=lambda point: point[0] - point[1])
+    corners = np.array([top_left, top_right, bottom_right, bottom_left], dtype=np.float32)
+    return {"corners": corners.tolist()}
+
+
+
+
+
+
+
+
+
 
 
 class ProcessRequest(BaseModel):
