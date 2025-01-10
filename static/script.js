@@ -5,6 +5,7 @@ const outputCtx = outputCanvas.getContext("2d");
 const uploadInput = document.getElementById("upload");
 const processButton = document.getElementById("process-button");
 const detectCornersButton = document.getElementById("detect-corners-button");
+const performOcrButton = document.getElementById("perform-ocr-button");
 //const outputImage = document.getElementById("output");
 
 let inputImage = new Image();
@@ -93,6 +94,8 @@ outputImage.onload = () => {
     outputImage.width * outputRatio,
     outputImage.height * outputRatio
   );
+
+  performOcrButton.hidden = false;
 
 };
 
@@ -236,3 +239,19 @@ processButton.addEventListener("click", () => {
     })
     .catch((error) => console.error("Errore:", error));
 });
+
+performOcrButton.addEventListener("click", () => {
+
+  const formData = new FormData();
+  formData.append("imagePath", outputImagePath);
+  
+  fetch("/ocr", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      outputPdfPath = data.outputPath;
+    })
+    .catch((error) => console.error("Errore:", error));
+})

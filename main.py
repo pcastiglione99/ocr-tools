@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import os
 from pydantic import BaseModel
-from utilities import detect_corners, perspective_crop
+from utilities import detect_corners, perspective_crop, ocr
 
 app = FastAPI()
 
@@ -38,7 +38,7 @@ async def upload_image(image: UploadFile = File(...)):
     
 
 @app.post("/detect")
-def detect_page_corners(imagePath: str = Form()):
+def detect_page_corners(imagePath: str = Form(...)):
 
     # Load the image
     image_path = imagePath.replace("/uploads/", "")
@@ -79,3 +79,17 @@ async def process_image(request: ProcessRequest):
         output_path=output_path)
 
     return {"outputPath": f"/uploads/warped_image.jpg"}
+
+
+@app.post("/ocr")
+async def perform_ocr(imagePath: str = Form(...)):
+    
+    # Load the image
+    image_path = imagePath.replace("/uploads/", "")
+    full_path = os.path.join(UPLOAD_FOLDER, image_path)
+    image = cv2.imread(full_path)
+    output_path = os.path.join(UPLOAD_FOLDER, "ocr_image.pdf")
+
+    ocr(image, output_path)
+    return {"outputPath": f"/uploads/ocr_image.pdf"}
+

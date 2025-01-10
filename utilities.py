@@ -79,14 +79,11 @@ def perspective_crop(image, points, output_path):
     # Trasformazione prospettica
     matrix = cv2.getPerspectiveTransform(points, destination_points)
     warped = cv2.warpPerspective(image, matrix, (int(width), int(height)))
-
-    # Salva l'immagine trasformata
-    output_path = os.path.join(UPLOAD_FOLDER, "warped_image.jpg")
     cv2.imwrite(output_path, warped)
 
 
 
 def ocr(image, output_path):
-    txt = pytesseract.image_to_pdf_or_hocr(img)
+    txt = pytesseract.image_to_pdf_or_hocr(image)
     with open(output_path, "wb") as f:
         f.write(txt)
