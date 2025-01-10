@@ -5,18 +5,14 @@ body {
     padding: 20px;
 }
 
-#canvas-container {
-    display: inline-block;
-    position: relative;
-}
 
 canvas {
+    margin: 10px;
     border: 1px solid #ccc;
 }
 
 button {
-    margin-top: 20px;
-    padding: 10px 20px;
+    margin: 10px;
     font-size: 16px;
     cursor: pointer;
 }

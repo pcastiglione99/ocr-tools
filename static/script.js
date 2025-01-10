@@ -48,6 +48,13 @@ uploadInput.addEventListener("change", (event) => {
 
 inputImage.onload = () => {
   inputCanvas.hidden = false;
+  
+  outputCanvas.hidden = true;
+  processButton.hidden = true;
+  points = []
+  performOcrButton.hidden = true;
+
+  inputCtx.clearRect(0, 0, inputCanvas.width, inputCanvas.height);
 
   inputHratio = inputCanvas.width / inputImage.width;
   inputVratio = inputCanvas.height / inputImage.height;
@@ -73,7 +80,7 @@ inputImage.onload = () => {
 };
 
 outputImage.onload = () => {
-  outputCtx.clearRect(0, 0, inputCanvas.width, inputCanvas.height);
+  outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
   
   outputCanvas.hidden = false;
 
@@ -234,8 +241,10 @@ processButton.addEventListener("click", () => {
     .then((response) => response.json())
     .then((data) => {
       outputImagePath = data.outputPath;
-      outputImage.src = outputImagePath;
+      //outputImage.src = outputImagePath;
+      outputImage.src = `${outputImagePath}?t=${new Date().getTime()}`;
       outputImage.hidden = false;
+
     })
     .catch((error) => console.error("Errore:", error));
 });
@@ -252,6 +261,8 @@ performOcrButton.addEventListener("click", () => {
     .then((response) => response.json())
     .then((data) => {
       outputPdfPath = data.outputPath;
+      console.log("ocr")
+      window.open(outputPdfPath);
     })
     .catch((error) => console.error("Errore:", error));
 })
