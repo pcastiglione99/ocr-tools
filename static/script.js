@@ -103,6 +103,10 @@ outputImage.onload = () => {
   );
 
   performOcrButton.hidden = false;
+  window.scrollTo({
+    top: 900,
+    behavior: "smooth",
+  });
 
 };
 
