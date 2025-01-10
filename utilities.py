@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pytesseract
 
 def detect_corners(image) -> np.array:
 # Resize the image for better processing (optional)
@@ -82,3 +83,10 @@ def perspective_crop(image, points, output_path):
     # Salva l'immagine trasformata
     output_path = os.path.join(UPLOAD_FOLDER, "warped_image.jpg")
     cv2.imwrite(output_path, warped)
+
+
+
+def ocr(image, output_path):
+    txt = pytesseract.image_to_pdf_or_hocr(img)
+    with open(output_path, "wb") as f:
+        f.write(txt)
