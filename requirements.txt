@@ -2,5 +2,6 @@ fastapi[standard]
 numpy
 opencv-python-headless
 pydantic
-python-multipart 
-uvicorn 
+python-multipart
+pytesseract
+uvicorn
