@@ -6,7 +6,6 @@ import cv2
 import numpy as np
 import os
 from pydantic import BaseModel
-from detect_page_corners import detect_page_corners
 
 app = FastAPI()
 

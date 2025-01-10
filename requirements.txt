@@ -1,6 +1,6 @@
 fastapi[standard]
 numpy
-opencv-python
+opencv-python-headless
 pydantic
 python-multipart 
 uvicorn 

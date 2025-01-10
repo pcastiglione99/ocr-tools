@@ -9,13 +9,16 @@
     <input type="file" id="upload" accept="image/*">
     
     <div id="canvas-container">
-        <canvas id="canvas" style="border-style: solid;"></canvas>
+        <canvas id="input-canvas" style="border-style: solid;" width="500" height="300" hidden></canvas>
     </div>
-    
-    <button id="detect-corners-button" disabled>Detect Corners</button>
 
-    <button id="process-button" disabled>Process Image</button>
+    <button id="detect-corners-button" hidden>Detect Corners</button>
 
+    <button id="process-button" hidden>Process Image</button>
+
+    <div id="output-canvas-container">
+        <canvas id="output-canvas" style="border-style: solid;" width="500" height="300" hidden></canvas>
+    </div>
     <img id="output" alt="Output Image" hidden>
 
     <script src="/static/script.js"></script>
