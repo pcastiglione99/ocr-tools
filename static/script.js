@@ -48,10 +48,10 @@ uploadInput.addEventListener("change", (event) => {
 
 inputImage.onload = () => {
   inputCanvas.hidden = false;
-  
+
   outputCanvas.hidden = true;
   processButton.hidden = true;
-  points = []
+  points = [];
   performOcrButton.hidden = true;
 
   inputCtx.clearRect(0, 0, inputCanvas.width, inputCanvas.height);
@@ -61,7 +61,8 @@ inputImage.onload = () => {
   inputRatio = Math.min(inputHratio, inputVratio);
 
   inputCenterShift_x = (inputCanvas.width - inputImage.width * inputRatio) / 2;
-  inputCenterShift_y = (inputCanvas.height - inputImage.height * inputRatio) / 2;
+  inputCenterShift_y =
+    (inputCanvas.height - inputImage.height * inputRatio) / 2;
 
   inputCtx.drawImage(
     inputImage,
@@ -81,15 +82,17 @@ inputImage.onload = () => {
 
 outputImage.onload = () => {
   outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
-  
+
   outputCanvas.hidden = false;
 
   outputHratio = outputCanvas.width / outputImage.width;
   outputVratio = outputCanvas.height / outputImage.height;
   outputRatio = Math.min(outputHratio, outputVratio);
 
-  outputCenterShift_x = (outputCanvas.width - outputImage.width * outputRatio) / 2;
-  outputCenterShift_y = (outputCanvas.height - outputImage.height * outputRatio) / 2;
+  outputCenterShift_x =
+    (outputCanvas.width - outputImage.width * outputRatio) / 2;
+  outputCenterShift_y =
+    (outputCanvas.height - outputImage.height * outputRatio) / 2;
   outputCtx.drawImage(
     outputImage,
     0,
@@ -107,7 +110,6 @@ outputImage.onload = () => {
     top: 900,
     behavior: "smooth",
   });
-
 };
 
 inputCanvas.addEventListener("click", (event) => {
@@ -203,7 +205,7 @@ function redrawCanvas() {
     inputCtx.closePath();
     inputCtx.fillStyle = "rgba(0, 255, 0, 0.5)";
     inputCtx.fill();
-    
+
     processButton.hidden = false;
   }
 }
@@ -229,7 +231,7 @@ detectCornersButton.addEventListener("click", () => {
 });
 
 processButton.addEventListener("click", () => {
-  points = points.map(([x, y]) => [
+  points_for_processing = points.map(([x, y]) => [
     (x - inputCenterShift_x) / inputRatio,
     (y - inputCenterShift_y) / inputRatio,
   ]);
@@ -238,26 +240,23 @@ processButton.addEventListener("click", () => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      points: points,
+      points: points_for_processing,
       imagePath: inputImagePath,
     }),
   })
     .then((response) => response.json())
     .then((data) => {
       outputImagePath = data.outputPath;
-      //outputImage.src = outputImagePath;
       outputImage.src = `${outputImagePath}?t=${new Date().getTime()}`;
       outputImage.hidden = false;
-
     })
     .catch((error) => console.error("Errore:", error));
 });
 
 performOcrButton.addEventListener("click", () => {
-
   const formData = new FormData();
   formData.append("imagePath", outputImagePath);
-  
+
   fetch("/ocr", {
     method: "POST",
     body: formData,
@@ -265,8 +264,8 @@ performOcrButton.addEventListener("click", () => {
     .then((response) => response.json())
     .then((data) => {
       outputPdfPath = data.outputPath;
-      console.log("ocr")
+      console.log("ocr");
       window.open(outputPdfPath);
     })
     .catch((error) => console.error("Errore:", error));
-})
+});

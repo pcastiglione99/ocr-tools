@@ -41,9 +41,8 @@ async def upload_image(image: UploadFile = File(...)):
 def detect_page_corners(imagePath: str = Form(...)):
 
     # Load the image
-    image_path = imagePath.replace("/uploads/", "")
-    full_path = os.path.join(UPLOAD_FOLDER, image_path)
-    image = cv2.imread(full_path)
+    imagePath = imagePath[1:]
+    image = cv2.imread(imagePath)
 
     # Detect corners
     corners = detect_corners(image)
@@ -63,13 +62,11 @@ async def process_image(request: ProcessRequest):
     points = request.points
     imagePath = request.imagePath
 
-    image_path = imagePath.replace("/uploads/", "")
-    full_path = os.path.join(UPLOAD_FOLDER, image_path)
-    
-    if not os.path.exists(full_path):
+    imagePath = imagePath[1:]
+    if not os.path.exists(imagePath):
         return JSONResponse(content={"error": "Image not found"}, status_code=404)
 
-    image = cv2.imread(full_path)
+    image = cv2.imread(imagePath)
     points = np.array(points, dtype="float32")
     output_path = os.path.join(UPLOAD_FOLDER, "warped_image.jpg")
 
@@ -85,9 +82,8 @@ async def process_image(request: ProcessRequest):
 async def perform_ocr(imagePath: str = Form(...)):
     
     # Load the image
-    image_path = imagePath.replace("/uploads/", "")
-    full_path = os.path.join(UPLOAD_FOLDER, image_path)
-    image = cv2.imread(full_path)
+    imagePath = imagePath[1:]
+    image = cv2.imread(imagePath)
     output_path = os.path.join(UPLOAD_FOLDER, "ocr_image.pdf")
 
     ocr(image, output_path)

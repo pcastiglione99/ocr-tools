@@ -33,7 +33,7 @@ def detect_corners(image) -> np.array:
             break
     else:
         print("Could not detect page corners.")
-        return None
+        return np.array([[0,0],[width,0],[width, height],[0, height]], dtype=np.float32)
 
     # Refine corner detection using perspective transformation
     corner_points = page_contour[:, 0, :].astype(np.float32)
@@ -84,6 +84,6 @@ def perspective_crop(image, points, output_path):
 
 
 def ocr(image, output_path):
-    txt = pytesseract.image_to_pdf_or_hocr(image)
+    ocr_image = pytesseract.image_to_pdf_or_hocr(image)
     with open(output_path, "wb") as f:
-        f.write(txt)
+        f.write(ocr_image)
