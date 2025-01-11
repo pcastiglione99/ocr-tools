@@ -7,8 +7,8 @@
 This project is a web service for processing images, detecting page corners, performing perspective transformations, and extracting text using OCR. The service allows users to upload images, detect corners of a page, perform perspective correction, and extract text from the image in a PDF format.
 
 ## Features
-
-- **Page Corner Detection**: Detects the four corners of a page in an image, suitable for document scanning or image alignment.
+- **Page Corner Selection**: User can select the corners of a page by clicking on them.
+- **Page Corner Detection**: Automatically detects the four corners of a page in an image, suitable for document scanning or image alignment.
 - **Perspective Correction**: Applies a perspective transformation to "straighten" images based on detected corners.
 - **OCR**: Extracts text from images using Tesseract OCR and generates a searchable PDF.
 
