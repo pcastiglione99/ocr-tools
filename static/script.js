@@ -6,7 +6,6 @@ const uploadInput = document.getElementById("upload");
 const processButton = document.getElementById("process-button");
 const detectCornersButton = document.getElementById("detect-corners-button");
 const performOcrButton = document.getElementById("perform-ocr-button");
-//const outputImage = document.getElementById("output");
 
 let inputImage = new Image();
 let outputImage = new Image();

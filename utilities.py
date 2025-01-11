@@ -47,22 +47,23 @@ def detect_corners(image) -> np.array:
         cv2.circle(image, (x, y), 5, (0, 0, 255), -1)
 
     # Calculate the center of the contour
-    center_x = np.mean(corner_points[:, 0])
-    center_y = np.mean(corner_points[:, 1])
+    center_x, center_y = np.mean(corner_points, axis=0)
 
-    # Sort points based on their relative positions
+    # Sort points relative to their positions around the center
     ordered_corners = sorted(
         corner_points,
         key=lambda point: (np.arctan2(point[1] - center_y, point[0] - center_x))
     )
 
-    # Manually assign topleft, topright, bottomright, bottomleft
-    top_left = min(ordered_corners, key=lambda point: point[0] + point[1])
-    bottom_right = max(ordered_corners, key=lambda point: point[0] + point[1])
-    bottom_left = min(ordered_corners, key=lambda point: point[0] - point[1])
-    top_right = max(ordered_corners, key=lambda point: point[0] - point[1])
-    
+    # Assign corners in a consistent order: top-left, top-right, bottom-right, bottom-left
+    ordered_corners = np.array(ordered_corners, dtype="float32")
+    top_left = ordered_corners[0]
+    top_right = ordered_corners[1]
+    bottom_right = ordered_corners[2]
+    bottom_left = ordered_corners[3]
+
     return np.array([top_left, top_right, bottom_right, bottom_left], dtype=np.float32)
+
 
 
 def perspective_crop(image, points, output_path):
