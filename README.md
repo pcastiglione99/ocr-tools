@@ -1,6 +1,6 @@
 # ocr-tools
 
-![ocr-tools](./ocr-tools.gif.gif)
+![ocr-tools](./ocr-tools.gif)
 
 ## Description
 
