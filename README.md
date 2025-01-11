@@ -1,5 +1,7 @@
 # ocr-tools
 
+![ocr-tools](./ocr-tools.gif.gif)
+
 ## Description
 
 This project is a web service for processing images, detecting page corners, performing perspective transformations, and extracting text using OCR. The service allows users to upload images, detect corners of a page, perform perspective correction, and extract text from the image in a PDF format.
