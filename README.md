@@ -36,3 +36,16 @@ This project is a web service for processing images, detecting page corners, per
 
 The service will be available at [http://localhost:8000](http://localhost:8000)
 
+## 🐳 Run with Docker  
+
+You can easily run this project using Docker.  
+
+1. Pull the Docker Image  
+```bash
+docker pull pcastiglione99/ocr-tools
+```
+2. Run the App
+```bash
+docker run -d -p 8000:8000 pcastiglione99/ocr-tools
+```
+
