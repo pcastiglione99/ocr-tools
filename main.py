@@ -14,9 +14,14 @@ UPLOAD_FOLDER = "uploads"
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+PROCESSED_FOLDER = "processed"
+if not os.path.exists(PROCESSED_FOLDER):
+    os.makedirs(PROCESSED_FOLDER)
+
 # Monta i file statici
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/processed", StaticFiles(directory="processed"), name="processed")
 
 # Endpoint per la pagina principale
 @app.get("/", response_class=HTMLResponse)
@@ -68,14 +73,15 @@ async def process_image(request: ProcessRequest):
 
     image = cv2.imread(imagePath)
     points = np.array(points, dtype="float32")
-    output_path = os.path.join(UPLOAD_FOLDER, "warped_image.jpg")
+    file_name = imagePath.strip("/uploads")
+    output_path = os.path.join(PROCESSED_FOLDER,file_name)
 
     perspective_crop(
         image=image,
         points=points,
         output_path=output_path)
 
-    return {"outputPath": f"/uploads/warped_image.jpg"}
+    return {"outputPath": f"/processed/{file_name}"}
 
 
 @app.post("/ocr")

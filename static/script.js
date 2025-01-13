@@ -49,7 +49,7 @@ inputImage.onload = () => {
   inputCanvas.hidden = false;
 
   outputCanvas.hidden = true;
-  processButton.hidden = true;
+  processButton.hidden = false;
   points = [];
   performOcrButton.hidden = true;
 
@@ -230,11 +230,19 @@ detectCornersButton.addEventListener("click", () => {
 });
 
 processButton.addEventListener("click", () => {
-  points_for_processing = points.map(([x, y]) => [
-    (x - inputCenterShift_x) / inputRatio,
-    (y - inputCenterShift_y) / inputRatio,
-  ]);
-
+  if (points.length === 0) {
+    points_for_processing = [
+      [0, 0],
+      [inputImage.width, 0],
+      [inputImage.width, inputImage.height],
+      [0, inputImage.height],
+    ];
+  } else {
+    points_for_processing = points.map(([x, y]) => [
+      (x - inputCenterShift_x) / inputRatio,
+      (y - inputCenterShift_y) / inputRatio,
+    ]);
+  }
   fetch("/process", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
