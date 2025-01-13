@@ -2,6 +2,7 @@ fastapi[standard]
 numpy
 opencv-python-headless
 pydantic
+pypdf2
 python-multipart
 pytesseract
 uvicorn[standard]

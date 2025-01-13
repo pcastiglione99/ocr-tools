@@ -6,7 +6,7 @@
 <body>
     <h1>📄 OCR Tools</h1>
 
-    <input type="file" id="upload" accept="image/*">
+    <input type="file" id="upload" accept="image/*" multiple>
     
     <div id="canvas-container">
         <canvas id="input-canvas" width="1000" height="600" hidden></canvas>
@@ -19,6 +19,7 @@
     <div id="output-canvas-container">
         <canvas id="output-canvas" width="1000" height="600" hidden></canvas>
     </div>
+    <button id="next-image-button" hidden>Next Image</button>
     
     <button id="perform-ocr-button" hidden>Perform Ocr</button>
     

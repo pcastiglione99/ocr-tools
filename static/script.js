@@ -5,7 +5,11 @@ const outputCtx = outputCanvas.getContext("2d");
 const uploadInput = document.getElementById("upload");
 const processButton = document.getElementById("process-button");
 const detectCornersButton = document.getElementById("detect-corners-button");
+const nextImageButton = document.getElementById("next-image-button");
 const performOcrButton = document.getElementById("perform-ocr-button");
+
+const inputImages = [];
+let inputImagesIndex = -1;
 
 let inputImage = new Image();
 let outputImage = new Image();
@@ -27,11 +31,13 @@ let outputCenterShift_x = 0;
 let outputCenterShift_y = 0;
 
 uploadInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = Array.from(event.target.files);
+  if (files.length === 0) return;
+  //const file = event.target.files[0];
+  //if (!file) return;
 
   const formData = new FormData();
-  formData.append("image", file);
+  files.forEach((file) => formData.append("images", file));
 
   // Send a POST request in order to upload the image
   fetch("/upload", {
@@ -40,9 +46,28 @@ uploadInput.addEventListener("change", (event) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      inputImagePath = data.filepath;
+      data.filepaths.forEach((filepath, index) => {
+        const newImage = new Image();
+        newImage.src = filepath;
+        inputImages.push(newImage);
+      });
+      inputImagesIndex = 0;
+      inputImagePath = inputImages[inputImagesIndex].src.replace(
+        inputImages[inputImagesIndex].baseURI,
+        ""
+      );
       inputImage.src = inputImagePath;
     });
+});
+
+nextImageButton.addEventListener("click", (event) => {
+  inputImagesIndex += 1;
+
+  inputImagePath = inputImages[inputImagesIndex].src.replace(
+    inputImages[inputImagesIndex].baseURI,
+    ""
+  );
+  inputImage.src = inputImagePath;
 });
 
 inputImage.onload = () => {
@@ -50,6 +75,11 @@ inputImage.onload = () => {
 
   outputCanvas.hidden = true;
   processButton.hidden = false;
+
+  nextImageButton.hidden = true;
+  if (inputImages.length > 1 && inputImagesIndex != inputImages.length - 1) {
+    nextImageButton.hidden = false;
+  }
   points = [];
   performOcrButton.hidden = true;
 
@@ -104,7 +134,10 @@ outputImage.onload = () => {
     outputImage.height * outputRatio
   );
 
-  performOcrButton.hidden = false;
+  if (inputImagesIndex === inputImages.length - 1) {
+    performOcrButton.hidden = false;
+  }
+
   window.scrollTo({
     top: 900,
     behavior: "smooth",
@@ -262,8 +295,7 @@ processButton.addEventListener("click", () => {
 
 performOcrButton.addEventListener("click", () => {
   const formData = new FormData();
-  formData.append("imagePath", outputImagePath);
-
+  formData.append("imagesPath", "/processed");
   fetch("/ocr", {
     method: "POST",
     body: formData,
@@ -271,7 +303,6 @@ performOcrButton.addEventListener("click", () => {
     .then((response) => response.json())
     .then((data) => {
       outputPdfPath = data.outputPath;
-      console.log("ocr");
       window.open(outputPdfPath);
     })
     .catch((error) => console.error("Errore:", error));
