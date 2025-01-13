@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import os
 from pydantic import BaseModel
-from utilities import detect_corners, perspective_crop, ocr
+from utilities import detect_corners, perspective_crop, ocr, clean_folder
 
 app = FastAPI()
 
@@ -35,6 +35,8 @@ async def index():
 # Endpoint per caricare un'immagine
 @app.post("/upload")
 async def upload_image(images: List[UploadFile] = File(...)):
+    clean_folder(UPLOAD_FOLDER)
+    clean_folder(PROCESSED_FOLDER)
     file_paths = []
     for image in images:
         file_path = os.path.join(UPLOAD_FOLDER, image.filename)
