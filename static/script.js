@@ -8,6 +8,7 @@ const detectCornersButton = document.getElementById("detect-corners-button");
 const nextImageButton = document.getElementById("next-image-button");
 const performOcrButton = document.getElementById("perform-ocr-button");
 const openPDFButton = document.getElementById("open-ocr-pdf-button");
+const loadingOverlay = document.getElementById("loading-overlay");
 
 const inputImages = [];
 let inputImagesIndex = -1;
@@ -175,8 +176,6 @@ inputCanvas.addEventListener("touchend", () => {
   draggingPointIndex = null;
 });
 
-
-
 inputCanvas.addEventListener("click", (event) => {
   const rect = inputCanvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -328,6 +327,10 @@ processButton.addEventListener("click", () => {
 performOcrButton.addEventListener("click", () => {
   const formData = new FormData();
   formData.append("imagesPath", "/processed");
+
+  // Show the loading overlay
+  loadingOverlay.style.display = "flex";
+
   fetch("/ocr", {
     method: "POST",
     body: formData,
@@ -335,8 +338,18 @@ performOcrButton.addEventListener("click", () => {
     .then((response) => response.json())
     .then((data) => {
       outputPdfPath = data.outputPath;
-      window.open(outputPdfPath);
+
+      // Hide the overlay after processing
+      loadingOverlay.style.display = "none";
+
       openPDFButton.hidden = false;
     })
-    .catch((error) => console.error("Errore:", error));
+    .catch((error) => {
+      console.error("Errore:", error);
+      loadingOverlay.style.display = "none";
+    });
+});
+
+openPDFButton.addEventListener("click", () => {
+  window.open(outputPdfPath);
 });
