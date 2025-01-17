@@ -10,6 +10,16 @@ const performOcrButton = document.getElementById("perform-ocr-button");
 const openPDFButton = document.getElementById("open-ocr-pdf-button");
 const loadingOverlay = document.getElementById("loading-overlay");
 
+inputCtx.shadowOffsetX = 5;
+inputCtx.shadowOffsetY = 5;
+inputCtx.shadowColor = '#888888';
+inputCtx.shadowBlur = 20;
+
+outputCtx.shadowOffsetX = 5;
+outputCtx.shadowOffsetY = 5;
+outputCtx.shadowColor = '#888888';
+outputCtx.shadowBlur = 20;
+
 const inputImages = [];
 let inputImagesIndex = -1;
 
@@ -35,9 +45,7 @@ let outputCenterShift_y = 0;
 uploadInput.addEventListener("change", (event) => {
   const files = Array.from(event.target.files);
   if (files.length === 0) return;
-  //const file = event.target.files[0];
-  //if (!file) return;
-
+  
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
 
@@ -48,17 +56,29 @@ uploadInput.addEventListener("change", (event) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      data.filepaths.forEach((filepath, index) => {
+      // Clear the inputImages array and reset the index
+      inputImages.length = 0; // Clear the array
+      inputImagesIndex = 0;
+      
+      // Add new images to the inputImages array
+      data.filepaths.forEach((filepath) => {
         const newImage = new Image();
         newImage.src = filepath;
         inputImages.push(newImage);
       });
-      inputImagesIndex = 0;
-      inputImagePath = inputImages[inputImagesIndex].src.replace(
-        inputImages[inputImagesIndex].baseURI,
-        ""
-      );
-      inputImage.src = inputImagePath;
+      
+      // Update the first image in the array
+      if (inputImages.length > 0) {
+        inputImagePath = inputImages[inputImagesIndex].src.replace(
+          inputImages[inputImagesIndex].baseURI,
+          ""
+        );
+        inputImage.src = inputImagePath;
+
+        // Force the canvas to update if necessary
+        redrawCanvas();
+      }
+
     });
 });
 
@@ -79,9 +99,6 @@ inputImage.onload = () => {
   processButton.hidden = false;
 
   nextImageButton.hidden = true;
-  if (inputImages.length > 1 && inputImagesIndex != inputImages.length - 1) {
-    nextImageButton.hidden = false;
-  }
   points = [];
   performOcrButton.hidden = true;
 
@@ -89,7 +106,7 @@ inputImage.onload = () => {
 
   inputHratio = inputCanvas.width / inputImage.width;
   inputVratio = inputCanvas.height / inputImage.height;
-  inputRatio = Math.min(inputHratio, inputVratio);
+  inputRatio = Math.min(inputHratio, inputVratio)  - 0.02;
 
   inputCenterShift_x = (inputCanvas.width - inputImage.width * inputRatio) / 2;
   inputCenterShift_y =
@@ -118,7 +135,7 @@ outputImage.onload = () => {
 
   outputHratio = outputCanvas.width / outputImage.width;
   outputVratio = outputCanvas.height / outputImage.height;
-  outputRatio = Math.min(outputHratio, outputVratio);
+  outputRatio = Math.min(outputHratio, outputVratio) - 0.02;
 
   outputCenterShift_x =
     (outputCanvas.width - outputImage.width * outputRatio) / 2;
@@ -135,6 +152,10 @@ outputImage.onload = () => {
     outputImage.width * outputRatio,
     outputImage.height * outputRatio
   );
+  
+  if (inputImages.length > 1 && inputImagesIndex != inputImages.length - 1) {
+    nextImageButton.hidden = false;
+  }
 
   if (inputImagesIndex === inputImages.length - 1) {
     performOcrButton.hidden = false;
