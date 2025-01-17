@@ -18,13 +18,13 @@ PROCESSED_FOLDER = "processed"
 if not os.path.exists(PROCESSED_FOLDER):
     os.makedirs(PROCESSED_FOLDER)
 
-# Monta i file statici
+# Static files mounting
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/processed", StaticFiles(directory="processed"), name="processed")
 
 
-# Endpoint per la pagina principale
+# Main page endpoint
 @app.get("/", response_class=HTMLResponse)
 async def index():
 
@@ -32,7 +32,7 @@ async def index():
         return f.read()
 
 
-# Endpoint per caricare un'immagine
+# Upload image endpoint
 @app.post("/upload")
 async def upload_image(images: List[UploadFile] = File(...)):
     clean_folder(UPLOAD_FOLDER)
@@ -46,7 +46,7 @@ async def upload_image(images: List[UploadFile] = File(...)):
 
     return {"filepaths": file_paths}
 
-
+# Detect corners endpoint
 @app.post("/detect")
 def detect_page_corners(imagePath: str = Form(...)):
     # Load the image
@@ -64,7 +64,7 @@ class ProcessRequest(BaseModel):
     imagePath: str
 
 
-# Endpoint per elaborare l'immagine
+# Process image endpoint
 @app.post("/process")
 async def process_image(request: ProcessRequest):
 
@@ -84,7 +84,7 @@ async def process_image(request: ProcessRequest):
 
     return {"outputPath": f"/processed/{file_name}"}
 
-
+# Perform OCR endpoint
 @app.post("/ocr")
 async def perform_ocr(imagesPath: str = Form(...)):
     # Load the image

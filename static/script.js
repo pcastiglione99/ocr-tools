@@ -7,6 +7,7 @@ const processButton = document.getElementById("process-button");
 const detectCornersButton = document.getElementById("detect-corners-button");
 const nextImageButton = document.getElementById("next-image-button");
 const performOcrButton = document.getElementById("perform-ocr-button");
+const openPDFButton = document.getElementById("open-ocr-pdf-button");
 
 const inputImages = [];
 let inputImagesIndex = -1;
@@ -144,6 +145,38 @@ outputImage.onload = () => {
   });
 };
 
+inputCanvas.addEventListener("touchstart", (event) => {
+  const rect = inputCanvas.getBoundingClientRect();
+  const touch = event.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  draggingPointIndex = points.findIndex(
+    ([px, py]) => Math.hypot(px - x, py - y) < 50
+  );
+});
+
+inputCanvas.addEventListener("touchmove", (event) => {
+  if (draggingPointIndex === null) return;
+
+  const rect = inputCanvas.getBoundingClientRect();
+  const touch = event.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  points[draggingPointIndex] = [x, y];
+  redrawCanvas();
+
+  // Prevenire il comportamento predefinito del touch (es. scrolling)
+  event.preventDefault();
+});
+
+inputCanvas.addEventListener("touchend", () => {
+  draggingPointIndex = null;
+});
+
+
+
 inputCanvas.addEventListener("click", (event) => {
   const rect = inputCanvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -151,7 +184,7 @@ inputCanvas.addEventListener("click", (event) => {
 
   // Check if clicking near an existing point
   const pointIndex = points.findIndex(
-    ([px, py]) => Math.hypot(px - x, py - y) < 10
+    ([px, py]) => Math.hypot(px - x, py - y) < 50
   );
 
   if (pointIndex === -1) {
@@ -288,7 +321,6 @@ processButton.addEventListener("click", () => {
     .then((data) => {
       outputImagePath = data.outputPath;
       outputImage.src = `${outputImagePath}?t=${new Date().getTime()}`;
-      outputImage.hidden = false;
     })
     .catch((error) => console.error("Errore:", error));
 });
@@ -304,6 +336,7 @@ performOcrButton.addEventListener("click", () => {
     .then((data) => {
       outputPdfPath = data.outputPath;
       window.open(outputPdfPath);
+      openPDFButton.hidden = false;
     })
     .catch((error) => console.error("Errore:", error));
 });
